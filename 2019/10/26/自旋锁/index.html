@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>自旋锁 | Hexo</title>
+  <meta name="keywords" content=" spinlock ">
+  <meta name="description" content="自旋锁 | Hexo">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hello World">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;10&#x2F;26&#x2F;hello-world&#x2F;index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-10-26T09:25:41.031Z">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.0.1" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-light.css?v=1.0.1" rel="stylesheet">
+
+<link href="//cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+<link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="/js/jquery.autocomplete.min.js?v=1.0.1" ></script>
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.0.1" ></script>
+
+</head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="false">
+  <input class="theme_blog_path" value="">
+</div>
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/" class="avatar_target">
+    <img class="avatar" src="/img/avatar.jpg" />
+</a>
+<div class="author">
+    <span>Blitz</span>
+</div>
+
+<div class="icon">
+    
+        
+        <a title="rss" href="/atom.xml" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-rss"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="github" href="https://github.com/WhatDream" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-github"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+    
+        
+        <a title="email" href="mailto:1522515386@qq.com" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-email"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="qq" href="http://wpa.qq.com/msgrd?v=3&uin=1522515386&site=qq&menu=yes" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-qq"></use>
+                </svg>
+            
+        </a>
+        
+    
+</div>
+
+
+
+
+<ul>
+    <li><div class="all active">全部文章<small>(5)</small></div></li>
+    
+        
+            
+            <li><div data-rel="锁">锁<small>(2)</small></div>
+                
+            </li>
+            
+        
+    
+        
+            
+            <li><div data-rel="网络">网络<small>(1)</small></div>
+                
+            </li>
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+    
+    
+    
+    
+    </div>
+    <div><a class="about  hasFriend  site_url"  href="/about">关于</a><a style="width: 50%"  class="friends">友链</a></div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="5">
+<input type="hidden" id="yelog_site_word_count" value="14.9k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        友情链接
+        <i class="back-title-list"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <form onkeydown="if(event.keyCode==13){return false;}">
+        <input class="search" type="text" placeholder="Search..." autocomplete="off"id="local-search-input" >
+        <i class="cross"></i>
+        <span>
+            <label for="tagswitch">Tags:</label>
+            <input id="tagswitch" type="checkbox" style="display: none" />
+            <i id="tagsWitchIcon"></i>
+        </span>
+    </form>
+    <div class="tags-list">
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color2">Idempotency</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color1">mysql</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color5">lock</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color5">quic</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">udp</a>
+    </li>
+    
+    <li class="article-tag-list-item">
+        <a href="javascript:" class="color4">spinlock</a>
+    </li>
+    
+    <div class="clearfix"></div>
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        <a  class=""
+           href="/2019/10/25/First-Post-For-Idempotency/"
+           data-tag="Idempotency"
+           data-author="" >
+            <span class="post-title" title="First Post For Idempotency">First Post For Idempotency</span>
+            <span class="post-date" title="2019-10-25 18:33:37">2019/10/25</span>
+        </a>
+        
+        <a  class="锁 "
+           href="/2019/10/26/Mysql%E6%82%B2%E8%A7%82%E9%94%81%E4%B8%8E%E4%B9%90%E8%A7%82%E9%94%81/"
+           data-tag="mysql,lock"
+           data-author="" >
+            <span class="post-title" title="Mysql悲观锁与乐观锁">Mysql悲观锁与乐观锁</span>
+            <span class="post-date" title="2019-10-26 11:16:37">2019/10/26</span>
+        </a>
+        
+        <a  class="网络 "
+           href="/2019/10/26/QUIC%E5%8D%8F%E8%AE%AE%E4%BB%8B%E7%BB%8D/"
+           data-tag="quic,udp"
+           data-author="" >
+            <span class="post-title" title="QUIC协议介绍">QUIC协议介绍</span>
+            <span class="post-date" title="2019-10-26 11:16:37">2019/10/26</span>
+        </a>
+        
+        <a  class=""
+           href="/2019/10/26/hello-world/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="Hello World">Hello World</span>
+            <span class="post-date" title="2019-10-26 17:25:41">2019/10/26</span>
+        </a>
+        
+        <a  class="锁 "
+           href="/2019/10/26/%E8%87%AA%E6%97%8B%E9%94%81/"
+           data-tag="spinlock"
+           data-author="" >
+            <span class="post-title" title="自旋锁">自旋锁</span>
+            <span class="post-date" title="2019-10-26 11:16:37">2019/10/26</span>
+        </a>
+        
+    </nav>
+</div>
+    </div>
+    <div class="hide-list">
+        <div class="semicircle">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div class="post">
+    <div class="pjax">
+        <article id="post-自旋锁" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">自旋锁</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            
+                <a href="javascript:" data-rel="锁">锁</a>
+            
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="javascript:" class="color4">spinlock</a>
+            
+        </span>
+        
+    </div>
+    <div class="article-meta">
+        
+        创建时间:<time class="date" title='更新时间: 2019-10-26 17:25:41'>2019-10-26 11:16</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>字数:3k</span>
+        
+        
+        <span id="busuanzi_container_page_pv">
+            阅读:<span id="busuanzi_value_page_pv">
+                <span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </span>
+        </span>
+        
+        
+        <span class="top-comment" title="跳转至评论区">
+            <a href="#comments">
+                评论:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是自旋锁？"><span class="toc-text">什么是自旋锁？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自旋锁的优点"><span class="toc-text">自旋锁的优点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#可重入的自旋锁和不可重入的自旋锁"><span class="toc-text">可重入的自旋锁和不可重入的自旋锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自旋锁的其他变种"><span class="toc-text">自旋锁的其他变种</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><div class='inner-toc'><h2>目录</h2><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是自旋锁？"><span class="toc-text">什么是自旋锁？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自旋锁的优点"><span class="toc-text">自旋锁的优点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#可重入的自旋锁和不可重入的自旋锁"><span class="toc-text">可重入的自旋锁和不可重入的自旋锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自旋锁的其他变种"><span class="toc-text">自旋锁的其他变种</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol></div></p>
+<h1 id="什么是自旋锁？"><a href="#什么是自旋锁？" class="headerlink" title="什么是自旋锁？"></a>什么是自旋锁？</h1><p><strong>自旋锁（spinlock）</strong>：是指当一个线程在获取锁的时候，如果锁已经被其它线程获取，那么该线程将循环等待，然后不断的判断锁是否能够被成功获取，直到获取到锁才会退出循环。</p>
+<p>获取锁的线程一直处于活跃状态，但是并没有执行任何有效的任务，使用这种锁会造成busy-waiting。</p>
+<p>Java如何实现自旋锁？</p>
+<p>下面是个简单的例子：</p>
+<blockquote>
+<p>/**</p>
+<p>* Date: 2016年1月4日 下午4:41:50</p>
+<p>*</p>
+<p>* @author medusar</p>
+<p>*/</p>
+<p>public class SpinLock {</p>
+<p>private AtomicReference cas = new AtomicReference();</p>
+<p>public void lock() {</p>
+<p>Thread current = Thread.currentThread();</p>
+<p>// 利用CAS</p>
+<p>while (!cas.compareAndSet(null, current)) {</p>
+<p>// DO nothing</p>
+<p>}</p>
+<p>}</p>
+<p>public void unlock() {</p>
+<p>Thread current = Thread.currentThread();</p>
+<p>cas.compareAndSet(current, null);</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p>lock（)方法利用的CAS，当第一个线程A获取锁的时候，能够成功获取到，不会进入while循环，如果此时线程A没有释放锁，另一个线程B又来获取锁，此时由于不满足CAS，所以就会进入while循环，不断判断是否满足CAS，直到A线程调用unlock方法释放了该锁。</p>
+<p>自旋锁存在的问题</p>
+<p>使用自旋锁会有以下一个问题：</p>
+<ol>
+<li><p>如果某个线程持有锁的时间过长，就会导致其它等待获取锁的线程进入循环等待，消耗CPU。使用不当会造成CPU使用率极高。</p>
+</li>
+<li><p>上面Java实现的自旋锁不是公平的，即无法满足等待时间最长的线程优先获取锁。不公平的锁就会存在“线程饥饿”问题。</p>
+</li>
+</ol>
+<h1 id="自旋锁的优点"><a href="#自旋锁的优点" class="headerlink" title="自旋锁的优点"></a>自旋锁的优点</h1><p>自旋锁不会使线程状态发生切换，一直处于用户态，即线程一直都是active的；不会使线程进入阻塞状态，减少了不必要的上下文切换，执行速度快</p>
+<p>非自旋锁在获取不到锁的时候会进入阻塞状态，从而进入内核态，当获取到锁的时候需要从内核态恢复，需要线程上下文切换。 （线程被阻塞后便进入内核（Linux）调度状态，这个会导致系统在用户态与内核态之间来回切换，严重影响锁的性能）</p>
+<h2 id="可重入的自旋锁和不可重入的自旋锁"><a href="#可重入的自旋锁和不可重入的自旋锁" class="headerlink" title="可重入的自旋锁和不可重入的自旋锁"></a>可重入的自旋锁和不可重入的自旋锁</h2><p>文章开始的时候的那段代码，仔细分析一下就可以看出，它是不支持重入的，即当一个线程第一次已经获取到了该锁，在锁释放之前又一次重新获取该锁，第二次就不能成功获取到。由于不满足CAS，所以第二次获取会进入while循环等待，而如果是可重入锁，第二次也是应该能够成功获取到的。</p>
+<p>而且，即使第二次能够成功获取，那么当第一次释放锁的时候，第二次获取到的锁也会被释放，而这是不合理的。</p>
+<p>为了实现可重入锁，我们需要引入一个计数器，用来记录获取锁的线程数。</p>
+<blockquote>
+<p>/**</p>
+<p>* Date: 2016年1月4日 下午5:21:23</p>
+<p>*</p>
+<p>* @author medusar</p>
+<p>*/</p>
+<p>public class ReentrantSpinLock {</p>
+<p>private AtomicReference cas = new AtomicReference();</p>
+<p>private int count;</p>
+<p>public void lock() {</p>
+<p>Thread current = Thread.currentThread();</p>
+<p>if (current == cas.get()) { // 如果当前线程已经获取到了锁，线程数增加一，然后返回</p>
+<p>count++;</p>
+<p>return;</p>
+<p>}</p>
+<p>// 如果没获取到锁，则通过CAS自旋</p>
+<p>while (!cas.compareAndSet(null, current)) {</p>
+<p>// DO nothing</p>
+<p>}</p>
+<p>}</p>
+<p>public void unlock() {</p>
+<p>Thread cur = Thread.currentThread();</p>
+<p>if (cur == cas.get()) {</p>
+<p>if (count &gt; 0) {// 如果大于0，表示当前线程多次获取了该锁，释放锁通过count减一来模拟</p>
+<p>count–;</p>
+<p>} else {// 如果count==0，可以将锁释放，这样就能保证获取锁的次数与释放锁的次数是一致的了。</p>
+<p>cas.compareAndSet(cur, null);</p>
+<p>}</p>
+<p>}</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<h2 id="自旋锁的其他变种"><a href="#自旋锁的其他变种" class="headerlink" title="自旋锁的其他变种"></a>自旋锁的其他变种</h2><p><strong>1. TicketLock</strong></p>
+<p>TicketLock主要解决的是公平性的问题。</p>
+<p>思路：每当有线程获取锁的时候，就给该线程分配一个递增的id，我们称之为排队号，同时，锁对应一个服务号，每当有线程释放锁，服务号就会递增，此时如果服务号与某个线程排队号一致，那么该线程就获得锁，由于排队号是递增的，所以就保证了最先请求获取锁的线程可以最先获取到锁，就实现了公平性。</p>
+<p>可以想象成银行办理业务排队，排队的每一个顾客都代表一个需要请求锁的线程，而银行服务窗口表示锁，每当有窗口服务完成就把自己的服务号加一，此时在排队的所有顾客中，只有自己的排队号与服务号一致的才可以得到服务。</p>
+<p>实现代码：</p>
+<blockquote>
+<p>/**</p>
+<p>*</p>
+<p>* date: 2016年1月4日 下午6:09:16</p>
+<p>*</p>
+<p>* @author Medusar</p>
+<p>*/</p>
+<p>public class TicketLock {</p>
+<p>/**</p>
+<p>* 服务号</p>
+<p>*/</p>
+<p>private AtomicInteger serviceNum = new AtomicInteger();</p>
+<p>/**</p>
+<p>* 排队号</p>
+<p>*/</p>
+<p>private AtomicInteger ticketNum = new AtomicInteger();</p>
+<p>/**</p>
+<p>* lock:获取锁，如果获取成功，返回当前线程的排队号，获取排队号用于释放锁.</p>
+<p>*</p>
+<p>* @return</p>
+<p>*/</p>
+<p>public int lock() {</p>
+<p>int currentTicketNum = ticketNum.incrementAndGet();</p>
+<p>while (currentTicketNum != serviceNum.get()) {</p>
+<p>// Do nothing</p>
+<p>}</p>
+<p>return currentTicketNum;</p>
+<p>}</p>
+<p>/**</p>
+<p>* unlock:释放锁，传入当前持有锁的线程的排队号</p>
+<p>*</p>
+<p>* @param ticketnum</p>
+<p>*/</p>
+<p>public void unlock(int ticketnum) {</p>
+<p>serviceNum.compareAndSet(ticketnum, ticketnum + 1);</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p>上面的实现方式是，线程获取锁之后，将它的排队号返回，等该线程释放锁的时候，需要将该排队号传入。但这样是有风险的，因为这个排队号是可以被修改的，一旦排队号被不小心修改了，那么锁将不能被正确释放。一种更好的实现方式如下：</p>
+<blockquote>
+<p>/**</p>
+<p>* Date: 2016年1月4日 下午6:11:50</p>
+<p>*</p>
+<p>* @author medusar</p>
+<p>*/</p>
+<p>public class TicketLockV2 {</p>
+<p>/**</p>
+<p>* 服务号</p>
+<p>*/</p>
+<p>private AtomicInteger serviceNum = new AtomicInteger();</p>
+<p>/**</p>
+<p>* 排队号</p>
+<p>*/</p>
+<p>private AtomicInteger ticketNum = new AtomicInteger();</p>
+<p>/**</p>
+<p>* 新增一个ThreadLocal，用于存储每个线程的排队号</p>
+<p>*/</p>
+<p>private ThreadLocal ticketNumHolder = new ThreadLocal();</p>
+<p>public void lock() {</p>
+<p>int currentTicketNum = ticketNum.incrementAndGet();</p>
+<p>// 获取锁的时候，将当前线程的排队号保存起来</p>
+<p>ticketNumHolder.set(currentTicketNum);</p>
+<p>while (currentTicketNum != serviceNum.get()) {</p>
+<p>// Do nothing</p>
+<p>}</p>
+<p>}</p>
+<p>public void unlock() {</p>
+<p>// 释放锁，从ThreadLocal中获取当前线程的排队号</p>
+<p>Integer currentTickNum = ticketNumHolder.get();</p>
+<p>serviceNum.compareAndSet(currentTickNum, currentTickNum + 1);</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p>上面的实现方式是将每个线程的排队号放到了ThreadLocal中。</p>
+<p><strong>TicketLock存在的问题</strong></p>
+<p>多处理器系统上，每个进程/线程占用的处理器都在读写同一个变量serviceNum ，每次读写操作都必须在多个处理器缓存之间进行缓存同步，这会导致繁重的系统总线和内存的流量，大大降低系统整体的性能。</p>
+<p>下面介绍的MCSLock和CLHLock就是解决这个问题的。</p>
+<p><strong>2. CLHLock</strong></p>
+<p>CLH锁是一种基于链表的可扩展、高性能、公平的自旋锁，申请线程只在本地变量上自旋，它不断轮询前驱的状态，如果发现前驱释放了锁就结束自旋，获得锁。</p>
+<p>实现代码如下：</p>
+<blockquote>
+<p>import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;</p>
+<p>/**</p>
+<p>* CLH的发明人是：Craig，Landin and Hagersten。</p>
+<p>* 代码来源：<a href="http://ifeve.com/java_lock_see2/" target="_blank" rel="noopener">http://ifeve.com/java_lock_see2/</a></p>
+<p>*/</p>
+<p>public class CLHLock {</p>
+<p>/**</p>
+<p>* 定义一个节点，默认的lock状态为true</p>
+<p>*/</p>
+<p>public static class CLHNode {</p>
+<p>private volatile boolean isLocked = true;</p>
+<p>}</p>
+<p>/**</p>
+<p>* 尾部节点,只用一个节点即可</p>
+<p>*/</p>
+<p>private volatile CLHNode tail;</p>
+<p>private static final ThreadLocal LOCAL = new ThreadLocal();</p>
+<p>private static final AtomicReferenceFieldUpdater UPDATER = AtomicReferenceFieldUpdater.newUpdater(CLHLock.class, CLHNode.class,</p>
+<p>“tail”);</p>
+<p>public void lock() {</p>
+<p>// 新建节点并将节点与当前线程保存起来</p>
+<p>CLHNode node = new CLHNode();</p>
+<p>LOCAL.set(node);</p>
+<p>// 将新建的节点设置为尾部节点，并返回旧的节点（原子操作），这里旧的节点实际上就是当前节点的前驱节点</p>
+<p>CLHNode preNode = UPDATER.getAndSet(this, node);</p>
+<p>if (preNode != null) {</p>
+<p>// 前驱节点不为null表示当锁被其他线程占用，通过不断轮询判断前驱节点的锁标志位等待前驱节点释放锁</p>
+<p>while (preNode.isLocked) {</p>
+<p>}</p>
+<p>preNode = null;</p>
+<p>LOCAL.set(node);</p>
+<p>}</p>
+<p>// 如果不存在前驱节点，表示该锁没有被其他线程占用，则当前线程获得锁</p>
+<p>}</p>
+<p>public void unlock() {</p>
+<p>// 获取当前线程对应的节点</p>
+<p>CLHNode node = LOCAL.get();</p>
+<p>// 如果tail节点等于node，则将tail节点更新为null，同时将node的lock状态职位false，表示当前线程释放了锁</p>
+<p>if (!UPDATER.compareAndSet(this, node, null)) {</p>
+<p>node.isLocked = false;</p>
+<p>}</p>
+<p>node = null;</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p><strong>3. MCSLock</strong></p>
+<p>MCSLock则是对本地变量的节点进行循环。</p>
+<blockquote>
+<p>/**</p>
+<p>* MCS:发明人名字John Mellor-Crummey和Michael Scott</p>
+<p>* 代码来源：<a href="http://ifeve.com/java_lock_see2/" target="_blank" rel="noopener">http://ifeve.com/java_lock_see2/</a></p>
+<p>*/</p>
+<p>public class MCSLock {</p>
+<p>/**</p>
+<p>* 节点，记录当前节点的锁状态以及后驱节点</p>
+<p>*/</p>
+<p>public static class MCSNode {</p>
+<p>volatile MCSNode next;</p>
+<p>volatile boolean isLocked = true;</p>
+<p>}</p>
+<p>private static final ThreadLocal NODE = new ThreadLocal();</p>
+<p>// 队列</p>
+<p>@SuppressWarnings(“unused”)</p>
+<p>private volatile MCSNode queue;</p>
+<p>// queue更新器</p>
+<p>private static final AtomicReferenceFieldUpdater UPDATER = AtomicReferenceFieldUpdater.newUpdater(MCSLock.class, MCSNode.class,</p>
+<p>“queue”);</p>
+<p>public void lock() {</p>
+<p>// 创建节点并保存到ThreadLocal中</p>
+<p>MCSNode currentNode = new MCSNode();</p>
+<p>NODE.set(currentNode);</p>
+<p>// 将queue设置为当前节点，并且返回之前的节点</p>
+<p>MCSNode preNode = UPDATER.getAndSet(this, currentNode);</p>
+<p>if (preNode != null) {</p>
+<p>// 如果之前节点不为null，表示锁已经被其他线程持有</p>
+<p>preNode.next = currentNode;</p>
+<p>// 循环判断，直到当前节点的锁标志位为false</p>
+<p>while (currentNode.isLocked) {</p>
+<p>}</p>
+<p>}</p>
+<p>}</p>
+<p>public void unlock() {</p>
+<p>MCSNode currentNode = NODE.get();</p>
+<p>// next为null表示没有正在等待获取锁的线程</p>
+<p>if (currentNode.next == null) {</p>
+<p>// 更新状态并设置queue为null</p>
+<p>if (UPDATER.compareAndSet(this, currentNode, null)) {</p>
+<p>// 如果成功了，表示queue==currentNode,即当前节点后面没有节点了</p>
+<p>return;</p>
+<p>} else {</p>
+<p>// 如果不成功，表示queue!=currentNode,即当前节点后面多了一个节点，表示有线程在等待</p>
+<p>// 如果当前节点的后续节点为null，则需要等待其不为null（参考加锁方法）</p>
+<p>while (currentNode.next == null) {</p>
+<p>}</p>
+<p>}</p>
+<p>} else {</p>
+<p>// 如果不为null，表示有线程在等待获取锁，此时将等待线程对应的节点锁状态更新为false，同时将当前线程的后继节点设为null</p>
+<p>currentNode.next.isLocked = false;</p>
+<p>currentNode.next = null;</p>
+<p>}</p>
+<p>}</p>
+<p>}</p>
+</blockquote>
+<p><strong>4. CLHLock 和 MCSLock</strong></p>
+<p>都是基于链表，不同的是CLHLock是基于隐式链表，没有真正的后续节点属性，MCSLock是显示链表，有一个指向后续节点的属性。</p>
+<p>将获取锁的线程状态借助节点(node)保存,每个线程都有一份独立的节点，这样就解决了TicketLock多处理器缓存同步的问题。</p>
+<p>自旋锁与互斥锁</p>
+<p>自旋锁与互斥锁都是为了实现保护资源共享的机制。</p>
+<p>无论是自旋锁还是互斥锁，在任意时刻，都最多只能有一个保持者。</p>
+<p>获取互斥锁的线程，如果锁已经被占用，则该线程将进入睡眠状态；获取自旋锁的线程则不会睡眠，而是一直循环等待锁释放。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><strong>自旋锁</strong>：线程获取锁的时候，如果锁被其他线程持有，则当前线程将循环等待，直到获取到锁。</p>
+<p>自旋锁等待期间，线程的状态不会改变，线程一直是用户态并且是活动的(active)。</p>
+<p>自旋锁如果持有锁的时间太长，则会导致其它等待获取锁的线程耗尽CPU。</p>
+<p>自旋锁本身无法保证公平性，同时也无法保证可重入性。</p>
+<p>基于自旋锁，可以实现具备公平性和可重入性质的锁。</p>
+<p>TicketLock:采用类似银行排号叫好的方式实现自旋锁的公平性，但是由于不停的读取serviceNum，每次读写操作都必须在多个处理器缓存之间进行缓存同步，这会导致繁重的系统总线和内存的流量，大大降低系统整体的性能。</p>
+<p>CLHLock和MCSLock通过链表的方式避免了减少了处理器缓存同步，极大的提高了性能，区别在于CLHLock是通过轮询其前驱节点的状态，而MCS则是查看当前节点的锁状态。</p>
+<p>CLHLock在NUMA架构下使用会存在问题。在没有cache的NUMA系统架构中，由于CLHLock是在当前节点的前一个节点上自旋,NUMA架构中处理器访问本地内存的速度高于通过网络访问其他节点的内存，所以CLHLock在NUMA架构上不是最优的自旋锁。</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 1522515386@qq.com </span>
+    </div>
+</article>
+
+
+<p>
+    <a href="javascript:void(0)" class="dashang" onclick="dashangToggle()">赏</a>
+</p>
+
+
+<div class="article_copyright">
+    <p><span class="copy-title">文章标题:</span>自旋锁</p>
+    <p><span class="copy-title">文章字数:</span><span class="post-count">3k</span></p>
+    <p><span class="copy-title">本文作者:</span><a href="javascript:void(0)" title="Blitz">Blitz</a></p>
+    <p><span class="copy-title">发布时间:</span>2019-10-26, 11:16:37</p>
+    <p><span class="copy-title">最后更新:</span>2019-10-26, 17:25:41</p>
+    <span class="copy-title">原始链接:</span><a class="post-url" href="/2019/10/26/%E8%87%AA%E6%97%8B%E9%94%81/" title="自旋锁">http://yoursite.com/2019/10/26/%E8%87%AA%E6%97%8B%E9%94%81/</a>
+    <p>
+        <span class="copy-title">版权声明:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+    </p>
+</div>
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: '51f8cc487ebfe419b7c8',
+            clientSecret: 'f0eb2fd84459591ad82953f3767c6b18ee26c98e',
+            repo: 'WhatDream.github.io',
+            owner: 'WhatDream',
+            admin: ['WhatDream'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+    
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">©2016-2019 Blitz</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full"><span class="min "></span></button>
+<button class="post-toc-menu"><span class="post-toc-menu-icons"></span></button>
+<div class="post-toc"><span class="post-toc-title">目录</span>
+    <div class="post-toc-content">
+
+    </div>
+</div>
+<a class="" id="rocket" href="javascript:void(0)"></a>
+    </div>
+</div>
+<div class="acParent"></div>
+
+<div class="hide_box" onclick="dashangToggle()"></div>
+<div class="shang_box">
+    <a class="shang_close" href="javascript:void(0)" onclick="dashangToggle()">×</a>
+    <div class="shang_tit">
+        <p>喜欢就点赞,疼爱就打赏</p>
+    </div>
+    <div class="shang_payimg">
+        <div class="pay_img">
+            <img src="/img/alipay.png" class="alipay" title="扫码支持">
+            <img src="/img/wxpay.png" class="weixin" title="扫码支持">
+        </div>
+    </div>
+    <div class="shang_payselect">
+        <span><label><input type="radio" name="pay" checked value="weixin">微信</label></span><span><label><input type="radio" name="pay" value="alipay">支付宝</label></span>
+    </div>
+</div>
+
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.0.1" ></script>
+
+<script src="/js/script.js?v=1.0.1" ></script>
+<script>
+    var img_resize = 'default';
+    /*作者、标签的自动补全*/
+    $(function () {
+        $('.search').AutoComplete({
+            'data': ['#Idempotency','#mysql','#lock','#quic','#udp','#spinlock',],
+            'itemHeight': 20,
+            'width': 418
+        }).AutoComplete('show');
+    })
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+            $(".post .pjax table").addClass("green_title");
+        
+
+        /*渲染打赏样式*/
+        
+        $("input[name=pay]").on("click", function () {
+            if($("input[name=pay]:checked").val()=="weixin"){
+                $(".shang_box .shang_payimg .pay_img").addClass("weixin_img");
+            } else {
+                $(".shang_box .shang_payimg .pay_img").removeClass("weixin_img");
+            }
+        })
+        
+
+        /*高亮代码块行号*/
+        
+        $('pre code').each(function(){
+            var lines = $(this).text().split('\n').length - 1, widther='';
+            if (lines>99) {
+                widther = 'widther'
+            }
+            var $numbering = $('<ul/>').addClass('pre-numbering ' + widther).attr("unselectable","on");
+            $(this).addClass('has-numbering ' + widther)
+                    .parent()
+                    .append($numbering);
+            for(var i=1;i<=lines;i++){
+                $numbering.append($('<li/>').text(i));
+            }
+        });
+        
+
+        /*访问数量*/
+        
+        $.getScript("//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js");
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+    function dashangToggle() {
+        $(".shang_box").fadeToggle();
+        $(".hide_box").fadeToggle();
+    }
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<style>
+    pre{
+        position: relative;
+        margin-bottom: 24px;
+        border-radius: 10px;
+        border: 1px solid #e2dede;
+        background: #FFF;
+        overflow: hidden;
+    }
+    code.has-numbering{
+        margin-left: 30px;
+    }
+    code.has-numbering.widther{
+        margin-left: 35px;
+    }
+    .pre-numbering{
+        margin: 0px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px;
+        padding: 0.5em 3px 0.7em 5px;
+        border-right: 1px solid #C3CCD0;
+        text-align: right;
+        color: #AAA;
+        background-color: #fafafa;
+    }
+    .pre-numbering.widther {
+        width: 35px;
+    }
+</style>
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav {
+        width: 542px;
+    }
+    .nav.fullscreen {
+        margin-left: -542px;
+    }
+    .nav-left {
+        width: 120px;
+    }
+    
+    
+    @media screen and (max-width: 1468px) {
+        .nav {
+            width: 492px;
+        }
+        .nav.fullscreen {
+            margin-left: -492px;
+        }
+        .nav-left {
+            width: 100px;
+        }
+    }
+    
+    
+    @media screen and (max-width: 1024px) {
+        .nav {
+            width: 492px;
+            margin-left: -492px
+        }
+        .nav.fullscreen {
+            margin-left: 0;
+        }
+        .nav .hide-list.fullscreen {
+            left: 492px
+        }
+    }
+    
+    @media screen and (max-width: 426px) {
+        .nav {
+            width: 100%;
+        }
+        .nav-left {
+            width: 100%;
+        }
+    }
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+    .post .pjax article .article-entry>ol, .post .pjax article .article-entry>ul, .post .pjax article>ol, .post .pjax article>ul{
+        border: #e2dede solid 1px;
+        border-radius: 10px;
+        padding: 10px 32px 10px 56px;
+    }
+    .post .pjax article .article-entry li>ol, .post .pjax article .article-entry li>ul,.post .pjax article li>ol, .post .pjax article li>ul{
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+    .post .pjax article .article-entry>ol>li, .post .pjax article .article-entry>ul>li,.post .pjax article>ol>li, .post .pjax article>ul>li{
+        margin-bottom: auto;
+        margin-left: auto;
+    }
+    .post .pjax article .article-entry li>ol>li, .post .pjax article .article-entry li>ul>li,.post .pjax article li>ol>li, .post .pjax article li>ul>li{
+        margin-bottom: auto;
+        margin-left: auto;
+    }
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+</style>
+
+
+
+
+
+
+
+</html>
